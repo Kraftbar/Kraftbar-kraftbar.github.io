@@ -1,0 +1,67 @@
+<!--     https://www.reddit.com/r/audiodrama/comments/72fkdp/looking_for_sound_effects_heres_a_few_librarys/ -->
+<!--     https://www.adobe.com/products/audition/offers/AdobeAuditionDLCSFX.html                             -->
+<!--     http://localhost/kraftbar.github.io/soundboard.html                                                 -->
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    button {
+      display: block;
+      margin: 10px;
+      padding: 10px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="buttons"></div>
+
+  <script>
+    const sounds = [
+    "cheering.mp3",
+"dial_up.mp3",
+"fbi open up.mp3",
+"hello darkness.mp3",
+"trump-Bing-Bing-Bong-Bong.wav",
+"trump-crime.wav",
+"trump-Disgrace.wav",
+"trump-grab-em.mp3",
+"trump-Morally-Corrupt.wav",
+"trump-no-jobs.wav",
+"trump-No-Protection.wav",
+"trump-poverty.wav",
+"trump-Unbelieveable.wav",
+"trump-What-the-hell-is-going-on.wav",
+"trump-What-the-hell.wav",
+"trump-what.wav",
+"Weather Rain 01.wav",
+"Weather Storm Lightning Bolt Crash Crack 01.wav"
+    ];
+
+    window.onload = function() {
+      sounds.forEach(filename => {
+        const button = document.createElement("button");
+        button.innerHTML = "Play - " + filename;
+        button.onclick = function() {
+          const audio = new Audio("./sounds/" + filename );
+          audio.onplaying = function() {
+            button.innerHTML = "Stop - " + filename;
+            button.onclick = function() {
+              audio.pause();
+              audio.currentTime = 0;
+            };
+          };
+          audio.onpause = function() {
+            button.innerHTML = "Play - " + filename;
+            button.onclick = function() {
+              audio.play();
+            };
+          };
+          audio.play();
+        };
+        document.querySelector("#buttons").appendChild(button);
+      });
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript">
+</script>
+
+<head>
+    <title> Title1 </title>
+    <meta name="viewport" content="width=700, maximum-scale=2.0, user-scalable=1">
+    <link href="index.css" rel="stylesheet">
+    <style>
+        div {
+            background-color: #FFEEDD;
+            border: 1px solid #FF8855;
+            padding: 10px;
+        }
+
+        #div1 {
+            -moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 40px;
+        }
+    </style>
+    
+   
+</head>
+
+
+
+<body>
+    <center>
+        <h2>-= Title2 =-</h2>
+    </center>
+    <table align="center">
+        <tr>
+            <td style="width:700px;padding:10px;" align="center">
+
+
+
+
+
+                
+
+<canvas id="xy-graph" width="700" height="400">
+  CANVAS NOT SUPPORTED IN THIS BROWSER!
+</canvas>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </td>
+        </tr>
+    </table>
+
+
+
+
+</body>
+
+ <script>
+
+
+// TODO:
+// - dates
+
+
+
+
+var temps = [];
+var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var tempDays = [];
+var newDays= [];
+
+ function httpGet(theUrl)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
+
+
+    var a =httpGet("https://api.met.no/weatherapi/probabilityforecast/1.1/?lat=59.90&lon=10.69");
+
+    parser = new DOMParser();
+    xmlDoc = parser.parseFromString(a, "text/xml");
+
+    x=xmlDoc.getElementsByTagName("time");
+
+
+    var from;
+    var to;
+    var temp;
+    prevDayFrom=x[0].getAttribute("from");
+    prevDay= new Date(prevDayFrom)
+    for (i = 0; i < x.length; i++) {
+        from=x[i].getAttribute("from");
+        to=x[i].getAttribute("to");
+        dateobj = new Date(from)
+        temp=x[i].getElementsByTagName("probability")[4].getAttribute("value");
+        if(temp>8){
+            temps.push(temp);        
+            tempDays.push(dateobj.getDay());
+            if(prevDay.getDay()!=dateobj.getDay()){
+                newDays.push(i);
+            }
+        }
+        
+        if(prevDay.getDay()!=dateobj.getDay()){
+        }        
+        console.log(x[i].getElementsByTagName("probability")[4].getAttribute("value"));
+        
+        
+        prevDay=dateobj;
+
+    }
+
+
+
+
+/* ------------------------------------------------------------------------------------------*/
+
+
+
+/* Initialization */
+
+// To be called when the page finishes loading:
+function init() {
+ Draw() ;
+}
+
+
+/* Canvas and context objects */
+
+var Canvas = document.getElementById('xy-graph');  
+var Ctx = null ;
+
+var Width = Canvas.width ;
+var Height = Canvas.height ;
+
+
+
+/*
+  The origin (0,0) of the canvas is the upper left:
+
+  (0,0)
+    --------- +X
+   |
+   |
+   |
+   |
+   +Y
+
+  Positive x coordinates go to the right, and positive y coordinates go down.
+
+  The origin in mathematics is the "center," and positive y goes *up*.
+
+  We'll refer to the mathematics coordinate system as the "logical"
+  coordinate system, and the coordinate system for the canvas as the
+  "physical" coordinate system.
+
+  The functions just below set up a mapping between the two coordinate
+  systems.
+
+  They're defined as functions, so that one wanted to, they could read
+  ther values from a from instead of having them hard-coded.
+ 
+ */
+
+
+function MaxX() {
+    return temps.length-1;
+}
+
+function MinX() {
+    return 0;
+}
+
+function MaxY() {
+    return 26;
+//  return MaxX() * Height / Width;
+}
+
+function MinY() {
+    return 5;
+//   return MinX() * Height / Width;
+}
+
+// Returns the distance between ticks on the X axis:
+function XTickDelta() {
+    return 4;
+}
+
+// Returns the distance between ticks on the Y axis:
+function YTickDelta() {
+    return 5;
+}   
+
+class funcProps{
+    constructor(builder) {
+      this.MaxX= 20;
+      this.MinX= 0;
+      this.MaxY= 22;
+      this.MinY= 5;
+      this.XTickDelta= 5;
+      this.YTickDelta= 5;
+      }
+}
+var lol = new funcProps();
+
+
+
+
+// Returns the physical x-coordinate of a logical x-coordinate:
+function XC(x) {
+    return (x - MinX()) / (MaxX() - MinX()) * Width ;
+}
+
+// Returns the physical y-coordinate of a logical y-coordinate:
+function YC(y) {
+    return Height - (y - MinY()) / (MaxY() - MinY()) * Height ;
+}
+
+
+/* Rendering functions */
+
+// Clears the canvas, draws the axes and graphs the function F.
+function Draw() {
+
+    // Evaluate the user-supplied code, which must bind a value to F.
+    //    eval(document.getElementById('function-code').value) ;
+    var F = function(x) {
+      return Math.sin(x)*Math.cos(2*x)*1 +9 ;
+
+    } ;
+
+
+    // Set up the canvas:
+    Ctx = Canvas.getContext('2d');
+    Ctx.clearRect(0,0,Width,Height) ;
+
+
+    // set
+
+    // Draw:
+    RenderFunction(F);
+    RenderTable(temps);   
+
+    DrawAxes() ;
+
+
+}
+
+
+
+function drawDays(table) {
+
+// find first day 
+
+}
+
+  
+// DrawAxes draws the X ad Y axes, with tick marks.
+function DrawAxes() {
+
+// take inn function object and set vars to obj vars
+    Ctx.save() ;
+    Ctx.lineWidth = 1 ;
+
+
+
+    Ctx.font = "bold 11px verdana, sans-serif";
+
+
+    // +Y axis
+    Ctx.beginPath() ;
+    Ctx.moveTo(XC(MinX()),YC(MinY())) ;
+    Ctx.lineTo(XC(MinX()),YC(MaxY())) ;
+    Ctx.moveTo(XC(MaxX()),YC(MinY())) ;
+    Ctx.lineTo(XC(MaxX()),YC(MaxY())) ;
+    Ctx.stroke() ;
+    // Y axis tick marks
+    var delta = YTickDelta();
+    for (var y_t = MinY()+delta ; y_t  < MaxY() ; y_t=y_t+delta) {
+        Ctx.beginPath() ;
+        Ctx.moveTo(XC(MinX()) - 5,YC(y_t )) ;
+        Ctx.lineTo(XC(MinX()) + 5,YC(y_t )) ;
+        Ctx.moveTo(XC(MaxX()) - 5,YC(y_t )) ;
+        Ctx.lineTo(XC(MaxX()) + 5,YC(y_t )) ;
+        Ctx.moveTo(XC(MaxX()) - 5,YC(y_t )) ;
+        Ctx.lineTo(XC(MaxX()) + 5,YC(y_t )) ;
+        Ctx.stroke() ;  
+        
+        Ctx.beginPath() ;
+        Ctx.lineWidth = 0.5; 
+        Ctx.strokeStyle = 'gray';
+        Ctx.fillText(y_t, XC(MinX()) , YC(y_t +0.1));
+        Ctx.moveTo(XC(MinX()),YC( y_t)) ;
+        Ctx.lineTo(XC(MaxX()),YC(y_t)) ;
+        Ctx.stroke() ;  
+        Ctx.lineWidth = 1; 
+        Ctx.strokeStyle = 'black';
+    }
+
+    // X axis
+    Ctx.beginPath() ;
+    Ctx.moveTo(XC(MinX()),YC(MinY())) ;
+    Ctx.lineTo(XC(MaxX()),YC(MinY())) ;
+    Ctx.moveTo(XC(MinX()),YC(MaxY())) ;
+    Ctx.lineTo(XC(MaxX()),YC(MaxY())) ;
+    Ctx.stroke() ;
+    // X tick marks
+    newdate=0;
+    var delta = XTickDelta() ;
+    for (var i = 0; i < newDays.length ; i++) {
+        Ctx.beginPath() ;
+        Ctx.moveTo(XC(newDays[i] ),YC(MinY())-5) ;
+        Ctx.lineTo(XC(newDays[i] ),YC(MinY())+5) ;
+        Ctx.moveTo(XC(newDays[i] ),YC(MaxY())-5) ;
+        Ctx.lineTo(XC(newDays[i] ),YC(MaxY())+5) ;
+        Ctx.stroke() ;  
+
+        if(i!=newDays.length -1){
+            Ctx.font = "bold 9px verdana, sans-serif";
+            Ctx.textAlign = "center";
+            Ctx.fillText(days[tempDays[newDays[i]]], XC(newDays[i] +2) , YC(MinY()+0.1));
+        }
+
+        Ctx.beginPath() ;
+        Ctx.lineWidth = 0.5; 
+        Ctx.strokeStyle = 'gray';
+        Ctx.moveTo(XC(newDays[i]),YC( MinY())) ;
+        Ctx.lineTo(XC(newDays[i]),YC(MaxY())) ;
+        Ctx.stroke() ;  
+        Ctx.lineWidth = 1; 
+        Ctx.strokeStyle = 'black';
+    }
+
+    Ctx.restore() ;
+}
+
+
+// When rendering, XSTEP determines the horizontal distance between points:
+var XSTEP = (MaxX()-MinX())/Width ;
+
+
+
+// RenderFunction(f) renders the input funtion f on the canvas.
+function RenderFunction(f) {
+  var first = true;
+
+  Ctx.beginPath() ;
+  for (var x = MinX(); x <= MaxX(); x += XSTEP) {
+   var y = f(x) ;
+   if (first) {
+    Ctx.moveTo(XC(x),YC(y)) ;
+    first = false ;
+   } else {
+    Ctx.lineTo(XC(x),YC(y)) ;
+   }
+  }
+  Ctx.stroke() ;
+}
+
+function RenderTable(table) {
+
+  var first = true;
+    var XSTEPTABLE = 1 ;
+
+  Ctx.beginPath() ;
+  teller=0;
+  for (var x = MinX(); x <= MaxX(); x += XSTEPTABLE) {
+    var y = temps[teller];
+   if (first) {
+    Ctx.moveTo(XC(x),YC(y)) ;
+    first = false ;
+   } else {
+    Ctx.lineTo(XC(x),YC(y)) ;
+   }
+   teller=teller+1;
+  }
+  Ctx.stroke() ;
+}
+
+
+init() 
+    </script>
+    
+
+</html>
